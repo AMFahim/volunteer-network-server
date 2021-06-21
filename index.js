@@ -3,6 +3,7 @@ const app = express()
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const MongoClient = require('mongodb').MongoClient;
+const { ObjectID } = require('mongodb');
 require('dotenv').config()
 const port = process.env.PORT || 5500
 //  console.log(process.env.DB_USER);
@@ -23,8 +24,37 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 client.connect(err => {
   console.log(err)
   const eventCollection = client.db("volunteer").collection("events");
-  console.log("database connected successfully")
-  // perform actions on the collection object
+
+
+  app.get('/events', (req, res) => {
+    eventCollection.find()
+    .toArray((err, items) => {
+      res.send(items)
+      // console.log('from database', items);
+    })
+  })
+
+
+
+
+  app.post ('/addEvent', (req, res) => {
+    const newEvent = req.body;
+    console.log(newEvent);
+    eventCollection.insertOne(newEvent)
+    .then(result => {
+      console.log('inserted count', result.insertedCount)
+      res.send(result.insertedCount > 0)
+    })
+  })
+
+
+  // app.delete('deleteEvent/:id', (req, res) => {
+  //   const id = ObjectID(req.params.id)
+  //   console.log('delete this', id)
+  //   eventCollection.findOneAndDelete({_id: id})
+  //   .then(documents => res.send(!!documents.value))
+  // })
+
   // client.close();
 });
 
